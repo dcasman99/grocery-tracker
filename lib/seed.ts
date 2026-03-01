@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client";
 import * as schema from "./schema";
@@ -10,6 +11,11 @@ const client = process.env.TURSO_DATABASE_URL
   : createClient({
       url: "file:grocery.db",
     });
+
+console.log(
+  "Using database:",
+  process.env.TURSO_DATABASE_URL || "file:grocery.db",
+);
 
 const db = drizzle(client, { schema });
 

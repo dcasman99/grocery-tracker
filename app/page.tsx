@@ -1,4 +1,5 @@
 import Link from "next/link";
+import appInfo from "../package.json";
 import {
   Card,
   CardContent,
@@ -9,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
+  console.log("Version: ", appInfo.version);
   return (
     <div className="min-h-screen bg-zinc-50 p-8">
       <div className="max-w-4xl mx-auto">
