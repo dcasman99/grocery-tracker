@@ -1,5 +1,5 @@
 import Link from "next/link";
-import appInfo from "../package.json";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -13,7 +13,15 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-zinc-50 p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold mb-2">Grocery Tracker</h1>
+        <div className="flex items-center gap-4 mb-2">
+          <Image
+            src="/logo.png"
+            alt="Grocery Tracker Logo"
+            width={60}
+            height={60}
+          />
+          <h1 className="text-4xl font-bold">Grocery Tracker</h1>
+        </div>
         <p className="text-zinc-600 mb-8">
           Manage groceries and split costs with your roommates
         </p>
