@@ -1,6 +1,6 @@
 {
   "name": "grocery-tracker",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,6 +9,7 @@
     "lint": "eslint",
     "db:seed": "tsx lib/seed.ts",
     "db:studio": "drizzle-kit studio",
+    "db:studio:dev": "drizzle-kit studio --config drizzle.config.local.ts",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {

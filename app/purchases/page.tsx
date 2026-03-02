@@ -216,7 +216,9 @@ export default function PurchasesPage() {
                       <div>
                         <p className="font-medium">{purchase.roommateName}</p>
                         <p className="text-sm text-zinc-500">
-                          {new Date(purchase.date).toLocaleDateString()}
+                          {new Date(purchase.date).toLocaleDateString("en-US", {
+                            timeZone: "UTC",
+                          })}
                           {purchase.notes && ` • ${purchase.notes}`}
                         </p>
                       </div>
