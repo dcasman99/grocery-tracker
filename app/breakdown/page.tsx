@@ -19,18 +19,22 @@ export default function BreakdownPage() {
   const [roommates, setRoommates] = useState<Roommate[]>([]);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [loadingStats, setLoadingStats] = useState(false);
+  const [loadingPurchases, setLoadingPurchases] = useState(false);
+  const [settlementText, setSettlementText] = useState<string[]>([]);
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   });
 
   useEffect(() => {
+    setLoadingPurchases(true);
     fetch("/api/roommates")
       .then((r) => r.json())
       .then(setRoommates);
     fetch("/api/purchases")
       .then((r) => r.json())
       .then(setPurchases);
+    setLoadingPurchases(false);
   }, []);
 
   const stats = useMemo(() => {
@@ -87,8 +91,16 @@ export default function BreakdownPage() {
       });
     });
 
-    return messages.length > 0 ? messages : ["Everyone is settled up!"];
+    setSettlementText(
+      messages.length > 0 ? messages : ["Everyone is settled up!"],
+    );
+
+    // return messages.length > 0 ? messages : ["Everyone is settled up!"];
   };
+
+  useEffect(() => {
+    getSettlementText();
+  }, [stats]);
 
   return (
     <div className="min-h-screen bg-zinc-50 p-8">
@@ -128,7 +140,7 @@ export default function BreakdownPage() {
                   <TableHead>Balance</TableHead>
                 </TableRow>
               </TableHeader>
-              {loadingStats ? (
+              {loadingStats || loadingPurchases ? (
                 <TableBody>
                   <TableRow>
                     <TableCell colSpan={4}>
@@ -193,7 +205,7 @@ export default function BreakdownPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {getSettlementText().map((text, i) => (
+              {settlementText.map((text, i) => (
                 <p key={i} className="p-3 bg-zinc-50 rounded">
                   {text}
                 </p>
