@@ -13,10 +13,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Purchase, Roommate } from "@/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function BreakdownPage() {
   const [roommates, setRoommates] = useState<Roommate[]>([]);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [loadingStats, setLoadingStats] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -32,6 +34,7 @@ export default function BreakdownPage() {
   }, []);
 
   const stats = useMemo(() => {
+    setLoadingStats(true);
     const [year, month] = selectedMonth.split("-").map(Number);
 
     const filtered = purchases.filter((p) => {
@@ -59,6 +62,7 @@ export default function BreakdownPage() {
       balance: r.spent - perPerson,
     }));
 
+    setLoadingStats(false);
     return { byRoommate, total, perPerson, settlements };
   }, [selectedMonth, purchases, roommates]);
 
@@ -124,38 +128,58 @@ export default function BreakdownPage() {
                   <TableHead>Balance</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
-                {stats.byRoommate.map((r) => {
-                  const balance = r.spent - stats.perPerson;
-                  return (
-                    <TableRow key={r.id}>
-                      <TableCell className="font-medium">{r.name}</TableCell>
-                      <TableCell>{r.trips}</TableCell>
-                      <TableCell>${r.spent.toFixed(2)}</TableCell>
-                      <TableCell
-                        className={
-                          balance > 0
-                            ? "text-green-600"
-                            : balance < 0
-                              ? "text-red-600"
-                              : ""
-                        }
-                      >
-                        {balance > 0 ? "+" : ""}
-                        {balance.toFixed(2)}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-                <TableRow className="font-bold">
-                  <TableCell>Total</TableCell>
-                  <TableCell>
-                    {stats.byRoommate.reduce((sum, r) => sum + r.trips, 0)}
-                  </TableCell>
-                  <TableCell>${stats.total.toFixed(2)}</TableCell>
-                  <TableCell></TableCell>
-                </TableRow>
-              </TableBody>
+              {loadingStats ? (
+                <TableBody>
+                  <TableRow>
+                    <TableCell colSpan={4}>
+                      <Skeleton className="h-6 w-full" />
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={4}>
+                      <Skeleton className="h-6 w-full" />
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={4}>
+                      <Skeleton className="h-6 w-full" />
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              ) : (
+                <TableBody>
+                  {stats.byRoommate.map((r) => {
+                    const balance = r.spent - stats.perPerson;
+                    return (
+                      <TableRow key={r.id}>
+                        <TableCell className="font-medium">{r.name}</TableCell>
+                        <TableCell>{r.trips}</TableCell>
+                        <TableCell>${r.spent.toFixed(2)}</TableCell>
+                        <TableCell
+                          className={
+                            balance > 0
+                              ? "text-green-600"
+                              : balance < 0
+                                ? "text-red-600"
+                                : ""
+                          }
+                        >
+                          {balance > 0 ? "+" : ""}
+                          {balance.toFixed(2)}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  <TableRow className="font-bold">
+                    <TableCell>Total</TableCell>
+                    <TableCell>
+                      {stats.byRoommate.reduce((sum, r) => sum + r.trips, 0)}
+                    </TableCell>
+                    <TableCell>${stats.total.toFixed(2)}</TableCell>
+                    <TableCell></TableCell>
+                  </TableRow>
+                </TableBody>
+              )}
             </Table>
             <p className="text-sm text-zinc-600 mt-4">
               Fair share per person: ${stats.perPerson.toFixed(2)}

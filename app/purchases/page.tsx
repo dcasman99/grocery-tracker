@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { GroceryItem, Purchase, Roommate } from "@/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PurchasesPage() {
   const [purchaseList, setPurchaseList] = useState<Purchase[]>([]);
@@ -25,6 +26,7 @@ export default function PurchasesPage() {
   const [notes, setNotes] = useState("");
   const [showItemRemoval, setShowItemRemoval] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [loadingPurchases, setLoadingPurchases] = useState(false);
 
   useEffect(() => {
     fetch("/api/roommates")
@@ -35,9 +37,11 @@ export default function PurchasesPage() {
   }, []);
 
   const loadPurchases = () => {
+    setLoadingPurchases(true);
     fetch("/api/purchases")
       .then((r) => r.json())
       .then(setPurchaseList);
+    setLoadingPurchases(false);
   };
 
   const loadGroceryItems = () => {
@@ -205,30 +209,43 @@ export default function PurchasesPage() {
           <CardHeader>
             <CardTitle>Purchase History ({purchaseList.length})</CardTitle>
           </CardHeader>
-          <CardContent>
-            {purchaseList.length === 0 ? (
-              <p className="text-zinc-500">No purchases logged yet.</p>
-            ) : (
-              <div className="space-y-2">
-                {[...purchaseList].reverse().map((purchase) => (
-                  <div key={purchase.id} className="p-3 bg-zinc-50 rounded">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium">{purchase.roommateName}</p>
-                        <p className="text-sm text-zinc-500">
-                          {new Date(purchase.date).toLocaleDateString("en-US", {
-                            timeZone: "UTC",
-                          })}
-                          {purchase.notes && ` • ${purchase.notes}`}
+          {loadingPurchases ? (
+            <CardContent>
+              <Skeleton className="h-8 w-full mb-2" />
+              <Skeleton className="h-8 w-full mb-2" />
+              <Skeleton className="h-8 w-full mb-2" />
+            </CardContent>
+          ) : (
+            <CardContent>
+              {purchaseList.length === 0 ? (
+                <p className="text-zinc-500">No purchases logged yet.</p>
+              ) : (
+                <div className="space-y-2">
+                  {[...purchaseList].reverse().map((purchase) => (
+                    <div key={purchase.id} className="p-3 bg-zinc-50 rounded">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium">{purchase.roommateName}</p>
+                          <p className="text-sm text-zinc-500">
+                            {new Date(purchase.date).toLocaleDateString(
+                              "en-US",
+                              {
+                                timeZone: "UTC",
+                              },
+                            )}
+                            {purchase.notes && ` • ${purchase.notes}`}
+                          </p>
+                        </div>
+                        <p className="font-bold">
+                          ${purchase.amount.toFixed(2)}
                         </p>
                       </div>
-                      <p className="font-bold">${purchase.amount.toFixed(2)}</p>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          )}
         </Card>
       </div>
     </div>

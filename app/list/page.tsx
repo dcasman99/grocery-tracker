@@ -13,12 +13,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { GroceryItem, Roommate } from "@/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function GroceryListPage() {
   const [items, setItems] = useState<GroceryItem[]>([]);
   const [roommates, setRoommates] = useState<Roommate[]>([]);
   const [newItem, setNewItem] = useState("");
   const [selectedRoommate, setSelectedRoommate] = useState("");
+  const [loadingItems, setLoadingItems] = useState(false);
 
   useEffect(() => {
     fetch("/api/roommates")
@@ -28,9 +30,11 @@ export default function GroceryListPage() {
   }, []);
 
   const loadItems = () => {
+    setLoadingItems(true);
     fetch("/api/grocery-items")
       .then((r) => r.json())
       .then(setItems);
+    setLoadingItems(false);
   };
 
   const handleAdd = async () => {
@@ -108,34 +112,42 @@ export default function GroceryListPage() {
           <CardHeader>
             <CardTitle>Items ({items.length})</CardTitle>
           </CardHeader>
-          <CardContent>
-            {items.length === 0 ? (
-              <p className="text-zinc-500">No items yet. Add some above!</p>
-            ) : (
-              <div className="space-y-2">
-                {items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between p-3 bg-zinc-50 rounded"
-                  >
-                    <div>
-                      <p className="font-medium">{item.item}</p>
-                      <p className="text-sm text-zinc-500">
-                        Added by {item.addedByName}
-                      </p>
-                    </div>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleRemove(item.id)}
+          {loadingItems ? (
+            <CardContent>
+              <Skeleton className="h-4 w-full mb-2" />
+              <Skeleton className="h-4 w-full mb-2" />
+              <Skeleton className="h-4 w-full mb-2" />
+            </CardContent>
+          ) : (
+            <CardContent>
+              {items.length === 0 ? (
+                <p className="text-zinc-500">No items yet. Add some above!</p>
+              ) : (
+                <div className="space-y-2">
+                  {items.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between p-3 bg-zinc-50 rounded"
                     >
-                      Remove
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
+                      <div>
+                        <p className="font-medium">{item.item}</p>
+                        <p className="text-sm text-zinc-500">
+                          Added by {item.addedByName}
+                        </p>
+                      </div>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleRemove(item.id)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          )}
         </Card>
       </div>
     </div>
