@@ -72,8 +72,9 @@ export default function GroceryListPage() {
             <CardTitle>Add Item</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-4">
+            <div className="md:flex gap-4">
               <Input
+                className="mb-2 md:mb-0"
                 placeholder="Item name"
                 value={newItem}
                 onChange={(e) => setNewItem(e.target.value)}
@@ -94,7 +95,11 @@ export default function GroceryListPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <Button onClick={handleAdd}>Add</Button>
+              <div className="flex justify-end">
+                <Button className="mt-2 md:mt-0" onClick={handleAdd}>
+                  Add
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
