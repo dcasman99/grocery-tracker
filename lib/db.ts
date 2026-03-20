@@ -2,7 +2,7 @@ import "dotenv/config";
 import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client";
 import * as schema from "./schema";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { GroceryItem, Purchase, Roommate } from "@/types";
 
 // Use Turso in production, local SQLite in development
@@ -42,8 +42,16 @@ export const removeGroceryItem = async (id: string) => {
   await db.delete(schema.groceryItems).where(eq(schema.groceryItems.id, id));
 };
 
-export const getPurchases = async (): Promise<Purchase[]> => {
-  return await db.select().from(schema.purchases);
+export const getPurchases = async (
+  limit: number,
+  offset: number,
+): Promise<Purchase[]> => {
+  return await db
+    .select()
+    .from(schema.purchases)
+    .orderBy(desc(schema.purchases.date))
+    .limit(limit)
+    .offset(offset);
 };
 
 export const addPurchase = async (purchase: Omit<Purchase, "id">) => {

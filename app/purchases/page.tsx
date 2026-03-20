@@ -27,21 +27,27 @@ export default function PurchasesPage() {
   const [showItemRemoval, setShowItemRemoval] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [loadingPurchases, setLoadingPurchases] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const PAGE_SIZE = 10;
 
   useEffect(() => {
     fetch("/api/roommates")
       .then((r) => r.json())
       .then(setRoommates);
-    loadPurchases();
+    loadPurchases(true);
     loadGroceryItems();
   }, []);
 
-  const loadPurchases = () => {
+  const loadPurchases = (reset = false) => {
     setLoadingPurchases(true);
-    fetch("/api/purchases")
+    const currentOffset = reset ? 0 : purchaseList.length;
+    fetch(`/api/purchases?limit=${PAGE_SIZE}&offset=${currentOffset}`)
       .then((r) => r.json())
-      .then(setPurchaseList);
-    setLoadingPurchases(false);
+      .then((data: Purchase[]) => {
+        setPurchaseList((prev) => (reset ? data : [...prev, ...data]));
+        setHasMore(data.length === PAGE_SIZE);
+        setLoadingPurchases(false);
+      });
   };
 
   const loadGroceryItems = () => {
@@ -65,7 +71,7 @@ export default function PurchasesPage() {
             notes,
           }),
         });
-        loadPurchases();
+        loadPurchases(true);
 
         if (groceryItems.length > 0) {
           setShowItemRemoval(true);
@@ -209,7 +215,7 @@ export default function PurchasesPage() {
           <CardHeader>
             <CardTitle>Purchase History ({purchaseList.length})</CardTitle>
           </CardHeader>
-          {loadingPurchases ? (
+          {loadingPurchases && purchaseList.length === 0 ? (
             <CardContent>
               <Skeleton className="h-8 w-full mb-2" />
               <Skeleton className="h-8 w-full mb-2" />
@@ -221,7 +227,7 @@ export default function PurchasesPage() {
                 <p className="text-zinc-500">No purchases logged yet.</p>
               ) : (
                 <div className="space-y-2">
-                  {[...purchaseList].reverse().map((purchase) => (
+                  {purchaseList.map((purchase) => (
                     <div key={purchase.id} className="p-3 bg-zinc-50 rounded">
                       <div className="flex justify-between items-start">
                         <div>
@@ -229,9 +235,7 @@ export default function PurchasesPage() {
                           <p className="text-sm text-zinc-500">
                             {new Date(purchase.date).toLocaleDateString(
                               "en-US",
-                              {
-                                timeZone: "UTC",
-                              },
+                              { timeZone: "UTC" },
                             )}
                             {purchase.notes && ` • ${purchase.notes}`}
                           </p>
@@ -242,6 +246,14 @@ export default function PurchasesPage() {
                       </div>
                     </div>
                   ))}
+                  {hasMore && (
+                    <button
+                      onClick={() => loadPurchases()}
+                      className="w-full text-sm text-zinc-500 hover:text-zinc-800 py-2 text-center"
+                    >
+                      {loadingPurchases ? "Loading..." : "Show 10 more"}
+                    </button>
+                  )}
                 </div>
               )}
             </CardContent>
