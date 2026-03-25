@@ -2,7 +2,7 @@ import "dotenv/config";
 import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client";
 import * as schema from "./schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, gte, lt } from "drizzle-orm";
 import { GroceryItem, Purchase, Roommate } from "@/types";
 
 // Use Turso in production, local SQLite in development
@@ -52,6 +52,21 @@ export const getPurchases = async (
     .orderBy(desc(schema.purchases.date))
     .limit(limit)
     .offset(offset);
+};
+
+export const getPurchasesByMonth = async (
+  year: number,
+  month: number,
+): Promise<Purchase[]> => {
+  const start = new Date(year, month - 1, 1);
+  const end = new Date(year, month, 1);
+  return await db
+    .select()
+    .from(schema.purchases)
+    .where(
+      and(gte(schema.purchases.date, start), lt(schema.purchases.date, end)),
+    )
+    .orderBy(desc(schema.purchases.date));
 };
 
 export const addPurchase = async (purchase: Omit<Purchase, "id">) => {

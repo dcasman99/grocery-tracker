@@ -1,8 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  reactCompiler: true,
+  reactCompiler: {
+    sources: (filename: string) => filename.includes("/app/"),
+  },
 };
 
 export default nextConfig;

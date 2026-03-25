@@ -27,27 +27,27 @@ export default function BreakdownPage() {
   });
 
   useEffect(() => {
-    setLoadingPurchases(true);
     fetch("/api/roommates")
       .then((r) => r.json())
       .then(setRoommates);
-    fetch("/api/purchases")
-      .then((r) => r.json())
-      .then(setPurchases);
-    setLoadingPurchases(false);
   }, []);
+
+  useEffect(() => {
+    const [year, month] = selectedMonth.split("-").map(Number);
+    setLoadingPurchases(true);
+    fetch(`/api/purchases/monthly?year=${year}&month=${month}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setPurchases(data);
+        setLoadingPurchases(false);
+      });
+  }, [selectedMonth]);
 
   const stats = useMemo(() => {
     setLoadingStats(true);
-    const [year, month] = selectedMonth.split("-").map(Number);
-
-    const filtered = purchases.filter((p) => {
-      const d = new Date(p.date);
-      return d.getFullYear() === year && d.getMonth() + 1 === month;
-    });
 
     const byRoommate = roommates.map((roommate) => {
-      const userPurchases = filtered.filter(
+      const userPurchases = purchases.filter(
         (p) => p.roommateId === roommate.id,
       );
       return {
@@ -68,7 +68,7 @@ export default function BreakdownPage() {
 
     setLoadingStats(false);
     return { byRoommate, total, perPerson, settlements };
-  }, [selectedMonth, purchases, roommates]);
+  }, [purchases, roommates]);
 
   const getSettlementText = () => {
     const sorted = [...stats.settlements].sort((a, b) => a.balance - b.balance);
@@ -120,7 +120,9 @@ export default function BreakdownPage() {
             <input
               type="month"
               value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
+              onChange={(e) => {
+                setSelectedMonth(e.target.value);
+              }}
               className="px-3 py-2 border rounded"
             />
           </CardContent>
